@@ -28,6 +28,11 @@ app.use("/uploads", express.static("uploads/"));
 const userrouter = require("./Routes/UserRoutes");
 app.use("/api/v1", userrouter);
 
+
+// firebaseuser routes defined
+const firebaseuserrouter = require("./Routes/firebaseUserRoute");
+app.use("/api/v1", firebaseuserrouter);
+// students  routes defined
 const studentRoutes = require("./Routes/studentRoutes");
 app.use("/api", studentRoutes);
 
