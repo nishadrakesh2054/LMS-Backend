@@ -1,48 +1,39 @@
 const jwt = require("jsonwebtoken");
-const User = require("../Models/UserSchema");
-const JWT_SECRETE_KEY = process.env.JWT_SECRETE_KEY || rolexbhai123; 
+const asyncHandler = require("express-async-handler");
+const User = require("../Models/authModel");
 
-const checkIsUserAuthenticated = async (req, res, next) => {
-  try {
-    const bearerToken = req.headers.authorization;
-
-    if (typeof bearerToken !== "undefined") {
-      const token = bearerToken.split(" ")[1];
-      jwt.verify(token, process.env.JWT_SECRETE_KEY, async (err, authData) => {
-        if (err) {
-          console.log(err);
-          return res.status(403).json({
-            success: false,
-            message: "access denied",
-          });
-        } else {
-          const userFound = await User.findById(authData.userId);
-
-          if (!userFound) {
-            return res.status(404).json({
-              message: "user not found",
-            });
-          }
-
-          req.headers.authData = authData;
-          req.userAuthenticated = userFound;
-          next();
-        }
-      });
+// Middleware to protect routes (checks if user is logged in)
+const protect = asyncHandler(async (req, res, next) => {
+    let token;
+  
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      try {
+        token = req.headers.authorization.split(" ")[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = await User.findById(decoded.userId).select("-password");
+        next();
+      } catch (error) {
+        console.error("Token validation failed", error);
+        res.status(401).json({ message: "Not authorized, token failed" });
+      }
     } else {
-      console.log("smthng went wrong validating token");
-      return res.status(403).json({
-        message: "no token found in req",
-      });
+      res.status(401).json({ message: "Not authorized, no token" });
     }
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      message: error,
-    });
-  }
-};
+  });
+  
+  // Middleware for Role-Based Access Control
+  const authorizeRoles = (...allowedRoles) => {
+    return (req, res, next) => {
+      if (!req.user || !allowedRoles.includes(req.user.roles[0])) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      next();
+    };
+  };
 
-module.exports = { checkIsUserAuthenticated };
+module.exports = { protect,authorizeRoles };
 
 

@@ -27,12 +27,10 @@ app.use(express.json());
 app.use("/uploads", express.static("uploads/"));
 
 // user routes defined
-const userrouter = require("./Routes/UserRoutes");
-app.use("/api", userrouter);
+const authrouter = require("./Routes/authRoutes");
+app.use("/api", authrouter);
 
-// firebaseAuthentication  routes defined
-const firebaseAuthrouter = require("./Routes/authRoute");
-app.use("/api", firebaseAuthrouter);
+
 // students  routes defined
 const studentRoutes = require("./Routes/studentRoutes");
 app.use("/api", studentRoutes);

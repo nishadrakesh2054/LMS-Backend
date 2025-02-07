@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
 
-const usersSchema = new mongoose.Schema({
+const authSchema = new mongoose.Schema({
   name: {
     type: String,
     required: [true, "Enter your name"],
@@ -16,17 +16,12 @@ const usersSchema = new mongoose.Schema({
     type: String,
     required: [true, "Enter your password"],
   },
-  role: {
-    type: String,
-    default: "admin", 
+  roles: {
+    type: [String], 
+    enum: ["admin", "teacher", "student", "librarian", "HR", "counselor"],
+    default: ["admin"],
   },
-  verified: {
-    type: Boolean,
-    default: false,
-  },
-  resetPasswordToken: String,
-  resetPasswordExpire: Date,
 });
 
-const userSchema = mongoose.model("User", usersSchema);
-module.exports = userSchema;
+const authentications = mongoose.model("auth", authSchema);
+module.exports = authentications;
