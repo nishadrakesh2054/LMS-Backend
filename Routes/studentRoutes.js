@@ -12,8 +12,6 @@ router.post("/students", studentController.addStudent);
 
 // router.post('/create-student', verifyToken, checkRole(['admin', 'staff', 'hr', 'counselor']), createStudent);
 
-
-
 // edit student
 router.put("/students/:id", studentController.updateStudent);
 
@@ -28,7 +26,12 @@ router.post(
 );
 
 // export  and save students from Excel
-router.get("/students/export",studentController.exportStudentsToExcel
-);
+router.get("/students/export", studentController.exportStudentsToExcel);
 
 module.exports = router;
+
+// studentID
+// 67a1bde703eaafb4d2eac8a0
+
+// bookid
+// 67a597dc83f952f77e0da67c

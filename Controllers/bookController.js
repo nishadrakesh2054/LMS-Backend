@@ -14,6 +14,7 @@ const bookValidationSchema = Joi.object({
   bookNumber: Joi.number().min(1).required(),
   classNumber: Joi.number().min(1).required(),
   personalAuthor: Joi.string().trim().allow(""),
+  placeOfPublication:Joi.string().trim().allow(""),
   corporateAuthor: Joi.string().trim().allow(""),
   conferenceAuthor: Joi.string().trim().allow(""),
   title: Joi.string().trim().required(),
@@ -48,6 +49,7 @@ const validateBook = (bookData) => {
     throw new Error(error.details[0].message);
   }
 };
+
 
 
 // create books 
@@ -97,6 +99,7 @@ const createBook = async (req, res) => {
     }
   };
   
+
 
 
 // Get all books

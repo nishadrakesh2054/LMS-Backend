@@ -20,6 +20,7 @@ const bookSchema = new mongoose.Schema(
       type: Date,
 
     },
+    placeOfPublication: { type: String, required: true, trim: true },
     physicalDescription: { type: String, trim: true },
     subjectAddedEntry: { type: String, trim: true },
     addedEntryPersonalName: { type: String, trim: true },

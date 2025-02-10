@@ -5,7 +5,7 @@ const User = require("../Models/authModel");
 // Middleware to protect routes (checks if user is logged in)
 const protect = asyncHandler(async (req, res, next) => {
     let token;
-  
+
     if (
       req.headers.authorization &&
       req.headers.authorization.startsWith("Bearer")
@@ -23,17 +23,17 @@ const protect = asyncHandler(async (req, res, next) => {
       res.status(401).json({ message: "Not authorized, no token" });
     }
   });
-  
-  // Middleware for Role-Based Access Control
-  const authorizeRoles = (...allowedRoles) => {
+
+// Middleware for Role-Based Access Control
+const authorizeRoles = (...allowedRoles) => {
     return (req, res, next) => {
       if (!req.user || !allowedRoles.includes(req.user.roles[0])) {
         return res.status(403).json({ message: "Access denied" });
       }
       next();
     };
-  };
+};
 
-module.exports = { protect,authorizeRoles };
+module.exports = { protect, authorizeRoles };
 
 

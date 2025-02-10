@@ -30,7 +30,6 @@ app.use("/uploads", express.static("uploads/"));
 const authrouter = require("./Routes/authRoutes");
 app.use("/api", authrouter);
 
-
 // students  routes defined
 const studentRoutes = require("./Routes/studentRoutes");
 app.use("/api", studentRoutes);
@@ -38,6 +37,13 @@ app.use("/api", studentRoutes);
 // books  routes defined
 const bookRoutes = require("./Routes/bookRoute");
 app.use("/api/books", bookRoutes);
+
+
+
+// books  routes defined
+const bookTransaction = require("./Routes/bookTransactionRoute");
+app.use("/api/books/transaction", bookTransaction);
+
 
 app.listen(PORT, () => {
   console.log(` Server listening on ${PORT}`);

@@ -17,9 +17,9 @@ const authSchema = new mongoose.Schema({
     required: [true, "Enter your password"],
   },
   roles: {
-    type: [String], 
+    type: [String],
     enum: ["admin", "teacher", "student", "librarian", "HR", "counselor"],
-    default: ["admin"],
+    default: ["student"],
   },
 });
 
