@@ -1,49 +1,103 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const { sequelize } = require("../DataBase/seqDB");
 
-const bookSchema = new mongoose.Schema(
+const Book = sequelize.define(
+  "Book",
   {
-    date: { type: Date },
-    title: { type: String, required: true, trim: true },
-    accessionNumber: { type: Number, required: true, unique: true },
-    isbnNo: { type: String, required: true, trim: true },
-    sourceOfAcquisition: { type: String, required: true, trim: true },
-    language: { type: String, required: true, trim: true },
-    bookNumber: { type: Number, required: true, min: 1 },
-    classNumber: { type: Number, required: true, min: 1 },
-    personalAuthor: { type: String, trim: true },
-    corporateAuthor: { type: String, trim: true },
-    conferenceAuthor: { type: String, trim: true },
-    statementOfResponsibility: { type: String, trim: true },
-    editionStatement: { type: String, trim: true },
-    publisherName: { type: String, required: true, trim: true },
-    dateOfPublication: {
-      type: Date,
-
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
     },
-    placeOfPublication: { type: String, required: true, trim: true },
-    physicalDescription: { type: String, trim: true },
-    subjectAddedEntry: { type: String, trim: true },
-    addedEntryPersonalName: { type: String, trim: true },
-    notes: { type: String, trim: true },
-    price: { type: Number, required: true, min: 0 },
-    source: { type: String, required: true, trim: true },
-    seriesTitle: { type: String, trim: true },
-    seriesNo: { type: Number, min: 1 },
+    date: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    title: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    accessionNumber: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      unique: true,
+    },
+    isbnNo: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    sourceOfAcquisition: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    language: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    bookNumber: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate: { min: 1 },
+    },
+    classNumber: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate: { min: 1 },
+    },
+    personalAuthor: { type: DataTypes.STRING },
+    corporateAuthor: { type: DataTypes.STRING },
+    conferenceAuthor: { type: DataTypes.STRING },
+    statementOfResponsibility: { type: DataTypes.STRING },
+    editionStatement: { type: DataTypes.STRING },
+    publisherName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    dateOfPublication: {
+      type: DataTypes.DATE,
+    },
+    placeOfPublication: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    physicalDescription: { type: DataTypes.STRING },
+    subjectAddedEntry: { type: DataTypes.STRING },
+    addedEntryPersonalName: { type: DataTypes.STRING },
+    notes: { type: DataTypes.STRING },
+    price: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+      validate: { min: 0 },
+    },
+    source: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    seriesTitle: { type: DataTypes.STRING },
+    seriesNo: {
+      type: DataTypes.INTEGER,
+      validate: { min: 1 },
+    },
     barCodes: {
-      type: [String], // Store multiple barcodes
-      required: true,
-      umique: true,
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      allowNull: false,
       validate: {
-        validator: function (v) {
-          return v.length > 0;
-        },
-        message: "At least one barcode is required.",
+        notEmpty: true,
       },
     },
-    callNo: { type: String, required: true, trim: true },
-    noOfCopies: { type: Number, required: true, min: 1 },
+    callNo: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    noOfCopies: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate: { min: 1 },
+    },
   },
- 
+  {
+    timestamps: false,
+  }
 );
 
-module.exports = mongoose.model("Catalogue", bookSchema);
+module.exports = Book;

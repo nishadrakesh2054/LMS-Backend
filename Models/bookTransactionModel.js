@@ -1,35 +1,48 @@
-const mongoose = require("mongoose");
+const { DataTypes } = require("sequelize");
+const { sequelize } = require("../DataBase/seqDB");
 
-const bookTransactionSchema = new mongoose.Schema({
-  student: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Student",
-    required: true,
+const BookTransaction = sequelize.define(
+  "BookTransaction",
+  {
+    studentId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "Students",
+        key: "id",
+      },
+    },
+    bookId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "Books",
+        key: "id",
+      },
+    },
+    issueDate: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
+    },
+    dueDate: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    returnDate: {
+      type: DataTypes.DATE,
+    },
+    isReturned: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    lateFee: {
+      type: DataTypes.FLOAT,
+      defaultValue: 0,
+    },
   },
-  book: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Catalogue",
-    required: true,
-  },
-  issueDate: {
-    type: Date,
-    default: Date.now,
-  },
-  dueDate: {
-    type: Date,
-    required: true,
-  },
-  returnDate: {
-    type: Date,
-  },
-  isReturned: {
-    type: Boolean,
-    default: false,
-  },
-  lateFee: {
-    type: Number,
-    default: 0,
-  },
-});
+  {
+    timestamps: false,
+  }
+);
 
-module.exports = mongoose.model("BookTransaction", bookTransactionSchema);
+module.exports = BookTransaction;

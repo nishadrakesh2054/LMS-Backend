@@ -1,20 +1,22 @@
 const asyncHandler = require("express-async-handler");
-const BookTransaction = require("../Models/bookTransactionModel");
-const Book = require("../Models/bookModel");
-const Student = require("../Models/Students");
+// const BookTransaction = require("../Models/bookTransactionModel");
+// const Book = require("../Models/bookModel");
+// const Student = require("../Models/Students");
+
+const { BookTransaction, Book, Student } = require("../Models/index.model");
 
 // Issue a book to a student
 const issueBook = asyncHandler(async (req, res) => {
   const { studentId, bookId, dueDate } = req.body;
 
   // Check if student exists
-  const student = await Student.findById(studentId);
+  const student = await Student.findByPk(studentId); // Correct method is findByPk in Sequelize
   if (!student) {
     return res.status(404).json({ message: "Student not found" });
   }
 
   // Check if book exists
-  const book = await Book.findById(bookId);
+  const book = await Book.findByPk(bookId); // Correct method is findByPk in Sequelize
   if (!book) {
     return res.status(404).json({ message: "Book not found" });
   }
@@ -26,8 +28,7 @@ const issueBook = asyncHandler(async (req, res) => {
 
   // Check if book is already issued
   const existingTransaction = await BookTransaction.findOne({
-    book: bookId,
-    isReturned: false,
+    where: { bookId, isReturned: false }, // Correct Sequelize query
   });
   if (existingTransaction) {
     return res
@@ -36,28 +37,25 @@ const issueBook = asyncHandler(async (req, res) => {
   }
 
   // Create a new book transaction
-  const transaction = new BookTransaction({
-    student: studentId,
-    book: bookId,
+  const transaction = await BookTransaction.create({
+    studentId, // Using studentId and bookId directly as per Sequelize model
+    bookId,
     dueDate,
   });
 
   // Reduce the number of available copies
   book.noOfCopies -= 1;
   await book.save();
-  await transaction.save();
 
   res
     .status(201)
     .json({ success: true, message: "Book issued successfully", transaction });
 });
 
-
-
 // Return a book
 const returnBook = asyncHandler(async (req, res) => {
   const { transactionId } = req.body;
-  const transaction = await BookTransaction.findById(transactionId);
+  const transaction = await BookTransaction.findByPk(transactionId); 
 
   if (!transaction) {
     return res.status(404).json({ message: "Transaction not found" });
@@ -83,13 +81,12 @@ const returnBook = asyncHandler(async (req, res) => {
   transaction.lateFee = lateFee;
   await transaction.save();
 
-
-   // Increase book copies since it's returned
-   const book = await Book.findById(transaction.book);
-   if (book) {
-     book.noOfCopies += 1;
-     await book.save();
-   }
+  // Increase book copies since it's returned
+  const book = await Book.findByPk(transaction.bookId); // Correct method is findByPk in Sequelize
+  if (book) {
+    book.noOfCopies += 1;
+    await book.save();
+  }
 
   res.status(200).json({
     success: true,
@@ -98,50 +95,69 @@ const returnBook = asyncHandler(async (req, res) => {
   });
 });
 
-
-
-
 // Get all active transactions (books not returned)
 const getActiveTransactions = asyncHandler(async (req, res) => {
-  const transactions = await BookTransaction.find({ isReturned: false })
-    .populate("student", "name email rollNo grade")
-    .populate("book", "title accessionNumber isbnNo");
+  const transactions = await BookTransaction.findAll({
+    where: { isReturned: false },
+    include: [
+      {
+        model: Student,
+        attributes: ["name", "email", "rollNo", "grade"],
+      },
+      {
+        model: Book,
+        attributes: ["title", "accessionNumber", "isbnNo"],
+      },
+    ],
+  });
 
   res.status(200).json({ success: true, transactions });
 });
-
-
 
 // Get all transactions for a specific student
 const getStudentTransactions = asyncHandler(async (req, res) => {
   const { studentId } = req.params;
-  const transactions = await BookTransaction.find({ student: studentId })
-    .populate("book", "title accessionNumber isbnNo")
-    .sort({ issueDate: -1 });
+  const transactions = await BookTransaction.findAll({
+    where: { studentId },
+    include: [
+      {
+        model: Book,
+        attributes: ["title", "accessionNumber", "isbnNo"],
+      },
+    ],
+    order: [["issueDate", "DESC"]],
+  });
 
-  res.status(200).json({ success: true, transactions });
+  res.status(200).json({ success: true,Total_Books:transactions.length, transactions });
 });
-
-
 
 // Get transaction details by ID
 const getTransactionById = asyncHandler(async (req, res) => {
-    const { transactionId } = req.params;
-    const transaction = await BookTransaction.findById(transactionId)
-    .populate("student", "name email rollNo grade")
-    .populate("book", "title accessionNumber isbnNo");
-  
-    if (!transaction) {
-      return res.status(404).json({ message: "Transaction not found" });
-    }
-  
-    res.status(200).json({ success: true, transaction });
+  const { transactionId } = req.params;
+  const transaction = await BookTransaction.findByPk(transactionId, {
+    include: [
+      {
+        model: Student,
+        attributes: ["name", "email", "rollNo", "grade"],
+      },
+      {
+        model: Book,
+        attributes: ["title", "accessionNumber", "isbnNo"],
+      },
+    ],
   });
+
+  if (!transaction) {
+    return res.status(404).json({ message: "Transaction not found" });
+  }
+
+  res.status(200).json({ success: true, transaction });
+});
 
 module.exports = {
   issueBook,
   returnBook,
   getActiveTransactions,
   getStudentTransactions,
-  getTransactionById
+  getTransactionById,
 };

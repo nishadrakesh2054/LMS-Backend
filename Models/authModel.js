@@ -1,27 +1,43 @@
-const mongoose = require("mongoose");
-const validator = require("validator");
+const { DataTypes } = require("sequelize");
+const { sequelize } = require("../DataBase/seqDB");
 
-const authSchema = new mongoose.Schema({
+const Auth = sequelize.define("Auth", {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
   name: {
-    type: String,
-    required: [true, "Enter your name"],
+    type: DataTypes.STRING,
+    allowNull: false,
   },
   email: {
-    type: String,
-    required: [true, "Enter your email"],
+    type: DataTypes.STRING,
+    allowNull: false,
     unique: true,
-    validate: [validator.isEmail, "enter valid email"],
+    validate: {
+      isEmail: true,
+    },
   },
   password: {
-    type: String,
-    required: [true, "Enter your password"],
+    type: DataTypes.STRING,
+    allowNull: false,
   },
   roles: {
-    type: [String],
-    enum: ["admin", "teacher", "student", "librarian", "HR", "counselor"],
-    default: ["student"],
+    type: DataTypes.ENUM(
+      "admin",
+      "teacher",
+      "student",
+      "librarian",
+      "HR",
+      "counselor"
+    ),
+    allowNull: false,
+    defaultValue: "student",
   },
+},{
+    timestamps: false,
+  
 });
 
-const authentications = mongoose.model("auth", authSchema);
-module.exports = authentications;
+module.exports = Auth;

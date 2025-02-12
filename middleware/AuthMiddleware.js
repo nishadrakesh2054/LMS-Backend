@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const asyncHandler = require("express-async-handler");
-const User = require("../Models/authModel");
+const Auth = require("../Models/authModel");
 
 // Middleware to protect routes (checks if user is logged in)
 const protect = asyncHandler(async (req, res, next) => {
@@ -13,7 +13,18 @@ const protect = asyncHandler(async (req, res, next) => {
       try {
         token = req.headers.authorization.split(" ")[1];
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = await User.findById(decoded.userId).select("-password");
+
+         
+      const user = await Auth.findOne({
+        where: { id: decoded.userId }, 
+        attributes: { exclude: ["password"] }, 
+      });
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      req.user = user; 
         next();
       } catch (error) {
         console.error("Token validation failed", error);
@@ -27,7 +38,7 @@ const protect = asyncHandler(async (req, res, next) => {
 // Middleware for Role-Based Access Control
 const authorizeRoles = (...allowedRoles) => {
     return (req, res, next) => {
-      if (!req.user || !allowedRoles.includes(req.user.roles[0])) {
+      if (!req.user || !allowedRoles.includes(req.user.roles)) {
         return res.status(403).json({ message: "Access denied" });
       }
       next();
